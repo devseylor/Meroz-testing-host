@@ -6,6 +6,37 @@
     <title>Unity Web Player | yashil_meros</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
+    <style>
+      /* --- CUSTOM STYLES ADDED HERE --- */
+
+      /* 1. Возвращаем BODY к стандартному фону (чтобы фон не растягивался на весь экран) */
+      body {
+        padding: 0;
+        margin: 0;
+        /* Убираем кастомное фоновое изображение, позволяя стандартному style.css установить цвет */
+        background: initial;
+        background-color: initial;
+      }
+      
+      /* 2. Устанавливаем изображение на контейнер Unity (размер окна игры) */
+      #unity-container {
+        /* Устанавливаем путь к вашей картинке */
+        background: url('TemplateData/image_66a78f.jpg') no-repeat center center; 
+        background-size: cover; /* Растягивает картинку, чтобы покрыть контейнер */
+        /* Убираем стандартный цвет контейнера, если он был задан */
+        background-color: transparent !important;
+      }
+      
+      /* 3. Очищаем старый фон загрузки (чтобы было видно изображение контейнера) */
+      #unity-canvas { 
+        background: transparent !important; /* Убираем стандартный цвет canvas, чтобы видеть фон контейнера */
+      }
+      #unity-loading-bar { 
+        background: transparent !important; /* Делаем фон загрузочной полосы прозрачным */
+      }
+
+      /* --- END CUSTOM STYLES --- */
+    </style>
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
