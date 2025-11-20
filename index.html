@@ -101,15 +101,37 @@
         bottom: 5%;
         transform: translateX(-50%);
         width: 80%;
-        max-width: 500px;
-        padding: 20px;
-        background-color: rgba(0, 0, 0, 0.7);
+        max-width: 520px;
+
+        padding: 24px 26px;
+
+        background: rgba(0, 0, 0, 0.55);          /* мягче чем был */
+        backdrop-filter: blur(14px);              /* главное — "мутное стекло" */
+        -webkit-backdrop-filter: blur(14px);
+
         color: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        border-radius: 20px;                      /* как на референсе */
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+
         font-family: Arial, sans-serif;
-        font-size: 14px;
         text-align: left;
+      }
+
+      /* Заголовок "Интересный факт" */
+      #fun-fact-box b,
+      #fun-fact-box .headline {
+        display: block;
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: white;
+      }
+
+      /* Основной текст */
+      #fun-fact-box .fact-text {
+        font-size: 15px;
+        line-height: 1.45;
+        opacity: 0.92;                            /* мягче и приятнее */
       }
     </style>
   </head>
@@ -126,9 +148,12 @@
         </div>
       </div>
 
-      <div id="fun-fact-box">
-        В горах Узбекистана существуют уникальные естественные рощи грецкого ореха, например, в Чаткальских горах
-      </div>
+    <div id="fun-fact-box">
+        <div class="headline">Интересный факт</div>
+        <div class="fact-text">
+            В горах Узбекистана существуют уникальные естественные рощи грецкого ореха, например, в Чаткальских горах.
+        </div>
+    </div>
 
       <div id="unity-warning"></div>
       <div id="unity-footer">
@@ -161,12 +186,12 @@
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/Builds.loader.js";
+      var loaderUrl = buildUrl + "/FARM_BUILD.loader.js";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/Builds.data.unityweb",
-        frameworkUrl: buildUrl + "/Builds.framework.js.unityweb",
-        codeUrl: buildUrl + "/Builds.wasm.unityweb",
+        dataUrl: buildUrl + "/FARM_BUILD.data.unityweb",
+        frameworkUrl: buildUrl + "/FARM_BUILD.framework.js.unityweb",
+        codeUrl: buildUrl + "/FARM_BUILD.wasm.unityweb",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "yashil_meros",
