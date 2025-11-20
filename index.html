@@ -30,7 +30,6 @@
       #unity-loading-bar {
         position: absolute;
         left: 50%;
-        top: 75%;
         transform: translate(-50%, -50%);
         display: none;
         width: 80%;
@@ -52,27 +51,30 @@
       }
 
       #progress-fill {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 0%;
-        background: linear-gradient(90deg, #4db8ff, #0077ff);
-        border-radius: 12px 0 0 12px;
-        box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.4);
-        transition: width 0.3s ease-out;
-      }
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #4db8ff, #0077ff);
+      border-radius: 12px 0 0 12px;
+      box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.4);
+      transition: width 0.3s ease-out;
+      overflow: hidden;
+    }
 
-      #progress-fill::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -40%;
-        width: 40%;
-        height: 100%;
-        background: linear-gradient(120deg, rgba(255, 255, 255, 0.4), transparent);
-        animation: shine 1.5s infinite;
-      }
+         #progress-fill::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -40%;
+      width: 40%;
+      height: 100%;
+
+      background: linear-gradient(120deg, rgba(255, 255, 255, 0.45), transparent);
+      border-radius: inherit;
+      animation: shine 1.5s infinite;
+    }
 
       @keyframes shine {
         from { left: -40%; }
@@ -98,15 +100,37 @@
         bottom: 5%;
         transform: translateX(-50%);
         width: 80%;
-        max-width: 500px;
-        padding: 20px;
-        background-color: rgba(0, 0, 0, 0.7);
+        max-width: 520px;
+
+        padding: 24px 26px;
+
+        background: rgba(0, 0, 0, 0.55);          /* мягче чем был */
+        backdrop-filter: blur(14px);              /* главное — "мутное стекло" */
+        -webkit-backdrop-filter: blur(14px);
+
         color: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        border-radius: 20px;                      /* как на референсе */
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+
         font-family: Arial, sans-serif;
-        font-size: 14px;
         text-align: left;
+      }
+
+      /* Заголовок "Интересный факт" */
+      #fun-fact-box b,
+      #fun-fact-box .headline {
+        display: block;
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: white;
+      }
+
+      /* Основной текст */
+      #fun-fact-box .fact-text {
+        font-size: 15px;
+        line-height: 1.45;
+        opacity: 0.92;                            /* мягче и приятнее */
       }
     </style>
   </head>
@@ -123,9 +147,12 @@
         </div>
       </div>
 
-      <div id="fun-fact-box">
-        интересный факт: дерево можно срубить
-      </div>
+    <div id="fun-fact-box">
+        <div class="headline">Интересный факт</div>
+        <div class="fact-text">
+            В горах Узбекистана существуют уникальные естественные рощи грецкого ореха, например, в Чаткальских горах.
+        </div>
+    </div>
 
       <div id="unity-warning"></div>
       <div id="unity-footer">
@@ -158,12 +185,12 @@
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/Builds.loader.js";
+      var loaderUrl = buildUrl + "/FARM_BUILD.loader.js";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/Builds.data.unityweb",
-        frameworkUrl: buildUrl + "/Builds.framework.js.unityweb",
-        codeUrl: buildUrl + "/Builds.wasm.unityweb",
+        dataUrl: buildUrl + "/FARM_BUILD.data.unityweb",
+        frameworkUrl: buildUrl + "/FARM_BUILD.framework.js.unityweb",
+        codeUrl: buildUrl + "/FARM_BUILD.wasm.unityweb",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "yashil_meros",
@@ -204,6 +231,21 @@
       };
 
       document.body.appendChild(script);
+      function updateLoadingBarPosition() {
+      const factBox = document.getElementById("fun-fact-box");
+      const bar = document.getElementById("unity-loading-bar");
+
+      const rect = factBox.getBoundingClientRect();
+
+      // bar окажется ровно над фактом
+      bar.style.top = (rect.top - bar.offsetHeight - 20) + "px";
+      }
+
+      // Обновить сразу
+      updateLoadingBarPosition();
+
+      // И обновлять при изменении размера окна
+      window.addEventListener("resize", updateLoadingBarPosition);
     </script>
   </body>
 </html>
