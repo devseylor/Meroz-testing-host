@@ -17,7 +17,6 @@
       }
 
       #unity-container {
-        position: relative; /* нужно для корректного позиционирования детей */
         background: url('TemplateData/image_66a78f.jpg') no-repeat center center;
         background-size: cover;
         background-color: transparent !important;
@@ -216,7 +215,6 @@
         "Саксаул - главное дерево пустынь Узбекистана. Его корни уходят на десятки метров вглубь в поисках воды, укрепляя пески.",
         "Ива белая, растущая вдоль арыков и рек, за сутки может выкачать из почвы и испарить через листья до 250 литров воды.",
         "Дикая фисташка - одно из древнейших растений Средней Азии. Это дерево-долгожитель, приспособившееся к каменистым склонам.",
-        "В горах Западного Тянь-Шаня сохранились реликтовые рощи тянь-шаньской ели, пережившие ледниковый период.",
         "Знаменитый шелковый путь проходил через оазисы, созданные руками человека с помощью посадок тополей и ив.",
         "В Узбекистане из сока местного вида клена (клён туркестанский) также можно добывать сладкий сироп, хотя это не так распространено, как в Канаде.",
         "В горах Узбекистана существуют уникальные естественные рощи грецкого ореха, например, в Чаткальских горах.",
@@ -233,18 +231,17 @@
 
       /* 🔥🔥 ПРАВИЛЬНОЕ РАСПОЛОЖЕНИЕ ПРОГРЕСС-БАРА 🔥🔥 */
       function updateProgressBarPosition() {
-          const container = document.getElementById("unity-container");
           const fact = document.getElementById("fun-fact-box");
           const bar = document.getElementById("unity-loading-bar");
 
-          const factRect = fact.getBoundingClientRect();
-          const containerRect = container.getBoundingClientRect();
+          const rect = fact.getBoundingClientRect();
 
-          // привязываем координаты к контейнеру и ставим лоадер строго над фактом
-          const targetTop = (factRect.top - containerRect.top) - bar.offsetHeight - 20;
+          // расстояние от низа экрана до верха факта
+          const distanceFromBottom = window.innerHeight - rect.top;
 
-          bar.style.top = `${Math.max(targetTop, 0)}px`;
-          bar.style.bottom = "auto";
+          // ставим прогресс-бар строго над фактом
+          bar.style.bottom = (distanceFromBottom + 20) + "px";
+          bar.style.top = "auto"; // важно!
       }
 
       setTimeout(updateProgressBarPosition, 0);
