@@ -17,6 +17,7 @@
       }
 
       #unity-container {
+        position: relative;
         background: url('TemplateData/image_66a78f.jpg') no-repeat center center;
         background-size: cover;
         background-color: transparent !important;
@@ -85,8 +86,8 @@
       /* --- ЛОГО И ФАКТЫ --- */
       #custom-header-logo {
         position: absolute;
-        top: 60px;
-        left: 50%;
+        top: 15%;
+        left: 20%;
         transform: translateX(-50%);
         width: 120px;
         height: 30px;
@@ -182,16 +183,16 @@
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/FARM_BUILD.loader.js";
+      var loaderUrl = buildUrl + "/farm8.loader.js";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/FARM_BUILD.data.unityweb",
-        frameworkUrl: buildUrl + "/FARM_BUILD.framework.js.unityweb",
-        codeUrl: buildUrl + "/FARM_BUILD.wasm.unityweb",
+        dataUrl: buildUrl + "/farm8.data.unityweb",
+        frameworkUrl: buildUrl + "/farm8.framework.js.unityweb",
+        codeUrl: buildUrl + "/farm8.wasm.unityweb",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "yashil_meros",
-        productVersion: "0.1.0",
+        productVersion: "0.1.1",
         showBanner: unityShowBanner,
       };
 
@@ -269,6 +270,12 @@
       };
 
       document.body.appendChild(script);
+      function forceUnityResize() {
+          if (typeof unityInstance !== 'undefined') {
+              unityInstance.SendMessage("WebGLResizer", "ForceResize");
+          }
+      }
+      window.addEventListener("resize", forceUnityResize);
     </script>
   </body>
 </html>
