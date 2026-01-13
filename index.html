@@ -159,37 +159,108 @@
         line-height: 1.45;
         opacity: 0.92;
       }
+        /* --- CONNECTION ERROR OVERLAY --- */
+        #connection-error-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: none;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            align-items: center;
+            justify-content: center;
+        }
+
+            #connection-error-overlay.active {
+                display: flex;
+            }
+
+        .error-panel {
+            width: 85%;
+            max-width: 420px;
+            padding: 28px 26px;
+            border-radius: 22px;
+            background: rgba(20, 20, 20, 0.9);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            color: #fff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        .error-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .error-text {
+            font-size: 15px;
+            line-height: 1.45;
+            opacity: 0.9;
+            margin-bottom: 22px;
+        }
+
+        .reload-btn {
+            width: 100%;
+            padding: 14px 0;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(90deg, #4db8ff, #0077ff);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+        }
     </style>
   </head>
 
   <body>
-    <div id="custom-header-logo"></div>
+      <div id="custom-header-logo"></div>
 
-    <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+      <div id="unity-container" class="unity-desktop">
+          <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
 
-      <div id="ui-bottom-wrapper">
-          <div id="unity-loading-bar">
-              <div id="unity-progress-bar">
-                  <div id="progress-fill"></div>
+          <div id="ui-bottom-wrapper">
+              <div id="unity-loading-bar">
+                  <div id="unity-progress-bar">
+                      <div id="progress-fill"></div>
+                  </div>
+              </div>
+
+              <div id="fun-fact-box">
+                  <div class="headline">Интересный факт</div>
+                  <div class="fact-text"></div>
               </div>
           </div>
 
-          <div id="fun-fact-box">
-              <div class="headline">Интересный факт</div>
-              <div class="fact-text"></div>
+          <div id="unity-warning"></div>
+          <div id="unity-footer">
+              <div id="unity-logo-title-footer"></div>
+              <div id="unity-fullscreen-button"></div>
+              <div id="unity-build-title">yashil_meros</div>
           </div>
       </div>
 
-      <div id="unity-warning"></div>
-      <div id="unity-footer">
-        <div id="unity-logo-title-footer"></div>
-        <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">yashil_meros</div>
+      <div id="connection-error-overlay">
+          <div class="error-panel">
+              <div class="error-title">Проблема с соединением</div>
+              <div class="error-text">
+                  Не удалось загрузить игру. Проверьте интернет и попробуйте снова.
+              </div>
+              <button class="reload-btn" onclick="location.reload()">Перезагрузить</button>
+          </div>
       </div>
-    </div>
 
-    <script>
+      <script>
+        function showConnectionError() {
+              console.warn("Connection / WASM error");
+              document
+                  .getElementById("connection-error-overlay")
+                  .classList.add("active");
+          }
+
+
       var canvas = document.querySelector("#unity-canvas");
 
       function unityShowBanner(msg, type) {
@@ -212,12 +283,12 @@
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/farm_release11.loader.js";
+      var loaderUrl = buildUrl + "/newbuild.loader.js";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/farm_release11.data.unityweb",
-        frameworkUrl: buildUrl + "/farm_release11.framework.js.unityweb",
-        codeUrl: buildUrl + "/farm_release11.wasm.unityweb",
+        dataUrl: buildUrl + "/newbuild.data.unityweb",
+        frameworkUrl: buildUrl + "/newbuild.framework.js.unityweb",
+        codeUrl: buildUrl + "/newbuild.wasm.unityweb",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "yashil_meros",
@@ -289,7 +360,7 @@
 
       function setLocalizedContent() {
           let lang = getCookie("click-language");
-          
+
           if (!lang || !translations[lang]) {
               lang = "ru";
           }
@@ -325,7 +396,8 @@
             unityInstance.SetFullscreen(1);
           };
         }).catch((message) => {
-          unityShowBanner(message, 'error');
+            console.error("Unity load failed:", message);
+            showConnectionError();
         });
       };
 
@@ -342,7 +414,22 @@
               "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
           ));
           return matches ? decodeURIComponent(matches[1]) : undefined;
-      }
-    </script>
+          }
+
+          // Ловим wasm / network ошибки
+          window.addEventListener("error", function (e) {
+              if (e.message && e.message.toLowerCase().includes("wasm")) {
+                  showConnectionError();
+              }
+          });
+
+          // iOS: возврат после блокировки экрана
+          //document.addEventListener("visibilitychange", function () {
+          //    if (!document.hidden) {
+          //        showConnectionError();
+          //    }
+          //});
+
+      </script>
   </body>
 </html>
