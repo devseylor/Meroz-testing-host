@@ -425,7 +425,7 @@
 
           // Ловим wasm / network ошибки
           window.addEventListener("error", function (e) {
-              if (e.message && e.message.toLowerCase().includes("wasm")) {
+              if (e.message) {
                   alert(e);
                   unityFailed = true;
                   showConnectionError();
