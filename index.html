@@ -298,7 +298,7 @@
         companyName: "DefaultCompany",
         productName: "yashil_meros",
         productVersion: "1.0.1",
-        showBanner: unityShowBanner,
+        showBanner: showConnectionError,
       };
 
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
@@ -424,13 +424,13 @@
           }
 
           // Ловим wasm / network ошибки
-          window.addEventListener("error", function (e) {
-              if (e.message) {
-                  alert(e);
-                  unityFailed = true;
-                  showConnectionError();
-              }
-          });
+          //window.addEventListener("error", function (e) {
+          //    if (e.message) {
+          //        alert(e);
+          //        unityFailed = true;
+          //        showConnectionError();
+          //    }
+          //});
 
           //// iOS: возврат после блокировки экрана
           //document.addEventListener("visibilitychange", () => {
