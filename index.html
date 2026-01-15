@@ -257,6 +257,8 @@
           let unityLoaded = false;
           let unityFailed = false;
           let visibilityHiddenAt = 0;
+          let loadAttempts = 0;
+          const MAX_LOAD_ATTEMPTS = 2; // 1 основная + 1 повторная попытка
 
         function showConnectionError() {
               console.warn("Connection / WASM error");
@@ -267,6 +269,7 @@
 
 
       var canvas = document.querySelector("#unity-canvas");
+      var unityInstance = null;
 
       function unityShowBanner(msg, type) {
         var warningBanner = document.querySelector("#unity-warning");
@@ -288,12 +291,12 @@
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/farm_release_12.loader.js";
+      var loaderUrl = buildUrl + "/buildnew.loader.js";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/farm_release_12.data.unityweb",
-        frameworkUrl: buildUrl + "/farm_release_12.framework.js.unityweb",
-        codeUrl: buildUrl + "/farm_release_12.wasm.unityweb",
+        dataUrl: buildUrl + "/buildnew.data.unityweb",
+        frameworkUrl: buildUrl + "/buildnew.framework.js.unityweb",
+        codeUrl: buildUrl + "/buildnew.wasm.unityweb",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "yashil_meros",
@@ -399,22 +402,44 @@
       var script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          document.querySelector("#progress-fill").style.width = (100 * progress) + "%";
-        }).then((unityInstance) => {
-          document.querySelector("#unity-loading-bar").style.display = "none";
-          document.querySelector("#custom-header-logo").style.display = "none";
-          document.querySelector("#fun-fact-box").style.display = "none";
-          unityLoaded = true;
+          function tryCreateUnityInstance() {
+              loadAttempts++;
+              console.log("Unity load attempt:", loadAttempts);
 
-          document.querySelector("#unity-fullscreen-button").onclick = () => {
-            unityInstance.SetFullscreen(1);
-          };
-        }).catch((message) => {
-            console.error("Unity load failed:", message);
-            unityFailed = true;
-            showConnectionError();
-        });
+              createUnityInstance(canvas, config, (progress) => {
+                  document.querySelector("#progress-fill").style.width = (100 * progress) + "%";
+              }).then((instance) => {
+                  unityInstance = instance;
+                  document.querySelector("#unity-loading-bar").style.display = "none";
+                  document.querySelector("#custom-header-logo").style.display = "none";
+                  document.querySelector("#fun-fact-box").style.display = "none";
+                  unityLoaded = true;
+
+                  document.querySelector("#unity-fullscreen-button").onclick = () => {
+                      unityInstance.SetFullscreen(1);
+                  };
+              }).catch((message) => {
+                  console.error("Unity load failed:", message);
+
+                  if (loadAttempts < MAX_LOAD_ATTEMPTS) {
+                      // Даем одну повторную попытку через небольшую задержку
+                      setTimeout(tryCreateUnityInstance, 1000);
+                  } else {
+                      unityFailed = true;
+                      showConnectionError();
+                  }
+              });
+          }
+
+          tryCreateUnityInstance();
+      };
+
+      script.onerror = () => {
+          console.error("Failed to load Unity loader script.");
+          if (!unityFailed) {
+              unityFailed = true;
+              showConnectionError();
+          }
       };
 
       document.body.appendChild(script);
