@@ -12,60 +12,69 @@
       body {
         padding: 0;
         margin: 0;
-        background: initial;
-        background-color: initial;
+        background-color: #000;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      html {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
       }
 
       #ui-bottom-wrapper {
           position: absolute;
           left: 0;
           right: 0;
-          bottom: calc(env(safe-area-inset-bottom) + 24px);
-
-          /* ИЗМЕНЕНИЕ: Flexbox управляет потоком */
+          bottom: calc(env(safe-area-inset-bottom) + 20px);
           display: flex;
-          flex-direction: column; /* Лоадер сверху, Факт снизу */
-          justify-content: flex-end; /* Прижимаем все к низу */
-          align-items: center; /* Центрируем по горизонтали */
-
-          padding: 0 32px;
-          gap: 20px; /* Отступ между лоадером и фактом */
+          flex-direction: column;
+          justify-content: flex-end;
+          align-items: center;
+          padding: 0 16px;
+          gap: 15px;
           z-index: 50;
-          
-          /* Чтобы контейнер не блокировал клики по бокам */
           pointer-events: none; 
       }
 
       #unity-container {
-        position: relative;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
         background: url('TemplateData/image_66a78f.jpg') no-repeat center center;
         background-size: cover;
-        background-color: transparent !important;
       }
 
       #unity-canvas {
+        width: 100% !important;
+        height: 100% !important;
+        display: block;
         background: transparent !important;
       }
 
-      /* --- ЛОАДЕР --- */
       #unity-loading-bar {
           position: relative; 
-          width: 80%;
+          width: 85%;
           max-width: 500px;
-          height: 22px;
-          
-          /* ВАЖНО: Сбрасываем старое позиционирование, чтобы он не улетал вправо */
+          height: 30px;
           left: auto;
           transform: none; 
-          margin: 0; /* Flexbox сам его отцентрует */
+          margin: 0;
 
           pointer-events: auto; 
           display: none;
 
-          background: rgba(255,255,255,0.15);
-          border-radius: 12px;
+          background: rgba(0,0,0,0.4);
+          border-radius: 21px;
           overflow: hidden;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+          box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+          border: 6px solid rgba(255, 255, 255, 0.9);
       }
 
       #unity-progress-bar {
@@ -83,11 +92,12 @@
         left: 0;
         height: 100%;
         width: 0%;
-        background: linear-gradient(90deg, #4db8ff, #0077ff);
-        border-radius: 12px 0 0 12px;
+        background: linear-gradient(180deg, #4db8ff, #0077ff);
+        border-radius: 12px 12px 12px 12px;
         box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.4);
         transition: width 0.3s ease-out;
         overflow: hidden;
+        border: 2px solid rgba(0, 107, 194, 1);
       }
 
       #progress-fill::after {
@@ -97,8 +107,7 @@
         left: -40%;
         width: 40%;
         height: 100%;
-        background: linear-gradient(120deg, rgba(255, 255, 255, 0.45), transparent);
-        border-radius: inherit;
+        background: linear-gradient(120deg, rgba(255, 255, 255, 0.25), transparent);
         animation: shine 1.5s infinite;
       }
 
@@ -122,18 +131,18 @@
 
       #fun-fact-box {
         position: relative;
-        width: 80%;
+        width: 92%;
         max-width: 520px;
+        min-height: 90px;
         
-        /* ВАЖНО: Тоже сбрасываем, чтобы факт стоял ровно */
         left: auto;
         bottom: auto;
         transform: none;
 
         pointer-events: auto;
-        padding: 24px 26px;
+        padding: 20px 22px;
 
-        background: rgba(0, 0, 0, 0.55);
+        background: rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
 
@@ -311,10 +320,9 @@
         document.getElementsByTagName('head')[0].appendChild(meta);
         document.querySelector("#unity-container").className = "unity-mobile";
         canvas.className = "unity-mobile";
-      } else {
-        canvas.style.width = "960px";
-        canvas.style.height = "600px";
       }
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
 
       document.querySelector("#unity-loading-bar").style.display = "block";
 
@@ -406,29 +414,29 @@
               loadAttempts++;
               console.log("Unity load attempt:", loadAttempts);
 
-              createUnityInstance(canvas, config, (progress) => {
-                  document.querySelector("#progress-fill").style.width = (100 * progress) + "%";
+        createUnityInstance(canvas, config, (progress) => {
+          document.querySelector("#progress-fill").style.width = (100 * progress) + "%";
               }).then((instance) => {
                   unityInstance = instance;
-                  document.querySelector("#unity-loading-bar").style.display = "none";
-                  document.querySelector("#custom-header-logo").style.display = "none";
-                  document.querySelector("#fun-fact-box").style.display = "none";
-                  unityLoaded = true;
+          document.querySelector("#unity-loading-bar").style.display = "none";
+          document.querySelector("#custom-header-logo").style.display = "none";
+          document.querySelector("#fun-fact-box").style.display = "none";
+          unityLoaded = true;
 
-                  document.querySelector("#unity-fullscreen-button").onclick = () => {
-                      unityInstance.SetFullscreen(1);
-                  };
-              }).catch((message) => {
-                  console.error("Unity load failed:", message);
+          document.querySelector("#unity-fullscreen-button").onclick = () => {
+            unityInstance.SetFullscreen(1);
+          };
+        }).catch((message) => {
+            console.error("Unity load failed:", message);
 
                   if (loadAttempts < MAX_LOAD_ATTEMPTS) {
                       // Даем одну повторную попытку через небольшую задержку
                       setTimeout(tryCreateUnityInstance, 1000);
                   } else {
-                      unityFailed = true;
-                      showConnectionError();
+            unityFailed = true;
+            showConnectionError();
                   }
-              });
+        });
           }
 
           tryCreateUnityInstance();
