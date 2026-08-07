@@ -267,10 +267,66 @@
           let unityFailed = false;
           let visibilityHiddenAt = 0;
           let loadAttempts = 0;
-          const MAX_LOAD_ATTEMPTS = 2; // 1 основная + 1 повторная попытка
+          let loadErrorReported = false;
+          const MAX_LOAD_ATTEMPTS = 2;
+          const loadStartedAt = Date.now();
 
-        function showConnectionError() {
-              console.warn("Connection / WASM error");
+        function sendNativeAnalytics(name, params) {
+            try {
+                var payload = params && typeof params === "object" ? Object.assign({}, params) : {};
+                payload.analytics_provider = ["appmetrica", "appsflyer"];
+                payload.ua = navigator.userAgent || "";
+                payload.platform = /iPhone|iPad|iPod/i.test(navigator.userAgent)
+                    ? "ios"
+                    : (/Android/i.test(navigator.userAgent) ? "android" : "other");
+                payload.elapsed_ms = Date.now() - loadStartedAt;
+
+                var paramsJson = JSON.stringify(payload);
+
+                if (window.AnalyticsBridge && typeof window.AnalyticsBridge.sendEvent === "function") {
+                    window.AnalyticsBridge.sendEvent(name, paramsJson);
+                    return;
+                }
+
+                if (
+                    window.webkit &&
+                    window.webkit.messageHandlers &&
+                    window.webkit.messageHandlers.AnalyticsBridge
+                ) {
+                    window.webkit.messageHandlers.AnalyticsBridge.postMessage({
+                        command: "sendEvent",
+                        name: name,
+                        parameters: paramsJson
+                    });
+                }
+            } catch (e) {
+                console.warn("[Analytics] send failed:", e);
+            }
+        }
+
+        function reportUnityLoadError(reason, details) {
+              if (loadErrorReported) return;
+              loadErrorReported = true;
+
+              var message = details;
+              if (message == null) message = "";
+              if (typeof message !== "string") {
+                  try { message = JSON.stringify(message); } catch (e) { message = String(message); }
+              }
+              if (message.length > 500) message = message.substring(0, 500);
+
+              sendNativeAnalytics("yashil_unity_load_error", {
+                  reason: reason || "unknown",
+                  message: message,
+                  attempt: loadAttempts,
+                  loader_url: typeof loaderUrl !== "undefined" ? loaderUrl : "",
+                  online: navigator.onLine !== false
+              });
+          }
+
+        function showConnectionError(reason, details) {
+              console.warn("Connection / WASM error", reason || "", details || "");
+              reportUnityLoadError(reason || "connection_error", details);
               document
                   .getElementById("connection-error-overlay")
                   .classList.add("active");
@@ -288,7 +344,10 @@
         var div = document.createElement('div');
         div.innerHTML = msg;
         warningBanner.appendChild(div);
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        if (type == 'error') {
+          div.style = 'background: red; padding: 10px;';
+          showConnectionError("unity_banner", msg);
+        }
         else {
           if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
           setTimeout(function() {
@@ -310,7 +369,7 @@
         companyName: "DefaultCompany",
         productName: "yashil_meros",
         productVersion: "1.0.1",
-        showBanner: showConnectionError,
+        showBanner: unityShowBanner,
       };
 
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
@@ -325,6 +384,11 @@
       canvas.style.height = "100%";
 
       document.querySelector("#unity-loading-bar").style.display = "block";
+
+      sendNativeAnalytics("yashil_unity_load_start", {
+          loader_url: loaderUrl,
+          online: navigator.onLine !== false
+      });
 
       const translations = {
           "ru": {
@@ -423,6 +487,10 @@
           document.querySelector("#fun-fact-box").style.display = "none";
           unityLoaded = true;
 
+          sendNativeAnalytics("yashil_unity_load_success", {
+              attempt: loadAttempts
+          });
+
           document.querySelector("#unity-fullscreen-button").onclick = () => {
             unityInstance.SetFullscreen(1);
           };
@@ -434,7 +502,7 @@
                       setTimeout(tryCreateUnityInstance, 1000);
                   } else {
             unityFailed = true;
-            showConnectionError();
+            showConnectionError("create_unity_instance", message);
                   }
         });
           }
@@ -446,7 +514,7 @@
           console.error("Failed to load Unity loader script.");
           if (!unityFailed) {
               unityFailed = true;
-              showConnectionError();
+              showConnectionError("loader_script", loaderUrl);
           }
       };
 
