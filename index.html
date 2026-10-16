@@ -336,7 +336,24 @@
       var canvas = document.querySelector("#unity-canvas");
       var unityInstance = null;
 
+      function isUnityLoadWarning(msg) {
+        var text = String(msg || "").toLowerCase();
+        return text.includes("webassembly streaming compilation failed")
+          || text.includes("content-encoding")
+          || text.includes(".wasm.br")
+          || text.includes("wasm streaming compile failed");
+      }
+
       function unityShowBanner(msg, type) {
+        if (type == 'error' || isUnityLoadWarning(msg)) {
+          unityFailed = true;
+          showConnectionError(
+            type == 'error' ? "unity_banner" : "unity_load_warning",
+            msg
+          );
+          return;
+        }
+
         var warningBanner = document.querySelector("#unity-warning");
         function updateBannerVisibility() {
           warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
@@ -344,27 +361,21 @@
         var div = document.createElement('div');
         div.innerHTML = msg;
         warningBanner.appendChild(div);
-        if (type == 'error') {
-          div.style = 'background: red; padding: 10px;';
-          showConnectionError("unity_banner", msg);
-        }
-        else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-          }, 5000);
-        }
+        if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+        setTimeout(function() {
+          warningBanner.removeChild(div);
+          updateBannerVisibility();
+        }, 5000);
         updateBannerVisibility();
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/FARM_BUILD.loader.js";
+      var loaderUrl = buildUrl + "/buildnew.loader.js";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/FARM_BUILD.data.unityweb",
-        frameworkUrl: buildUrl + "/FARM_BUILD.framework.js.unityweb",
-        codeUrl: buildUrl + "/FARM_BUILD.wasm.unityweb",
+        dataUrl: buildUrl + "/buildnew.data.unityweb",
+        frameworkUrl: buildUrl + "/buildnew.framework.js.unityweb",
+        codeUrl: buildUrl + "/buildnew.wasm.unityweb",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "yashil_meros",
