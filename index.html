@@ -380,6 +380,13 @@
         companyName: "DefaultCompany",
         productName: "yashil_meros",
         productVersion: "1.0.1",
+        cacheControl: function (url) {
+          if (url === config.dataUrl) {
+            return "immutable";
+          }
+
+          return /\.bundle(?:$|\?)/.test(url) ? "must-revalidate" : "no-store";
+        },
         showBanner: unityShowBanner,
       };
 
